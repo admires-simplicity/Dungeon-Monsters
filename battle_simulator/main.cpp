@@ -15,6 +15,9 @@ public:
   Move() : type(Type::NORMAL), power(0) {} //same as MonsterSpecies class
   Move(Type type, unsigned int power, std::string name) : type(type), power(power),
     name(name) {}
+  const std::string getName() const {
+    return name;
+  }
 };
 
 std::map<unsigned int, Move> MoveList {
@@ -57,8 +60,11 @@ public:
   const int& getHp() {
     return hp;
   }
-  Move& getMove(unsigned int n) {
-    return moves[n];
+  // Move& getMove(unsigned int n) {
+  //   return moves[n];
+  // }
+  const std::vector<Move>& getMoves() {
+    return moves;
   }
 
   const char* getName() {
@@ -93,6 +99,10 @@ int main() {
   for (int i = 0; i < team1.size(); ++i) {
     team1[i].addMove(MoveList[1]);
     team2[i].addMove(MoveList[1]);
+
+    team1[i].addMove(MoveList[2]);
+    team2[i].addMove(MoveList[2]);
+
   }
 
   //initialize ncurses
@@ -112,10 +122,18 @@ int main() {
   box(enemy_team_win, 0, 0);
 
   WINDOW* player_team_win = subwin(main_win, 20, getmaxx(main_win) - 2,
-    getmaxy(enemy_team_win)+1, 1);
+    1+getmaxy(enemy_team_win), 1);
   box(player_team_win, 0, 0);
 
+  WINDOW* control_win = subwin(main_win,
+    getmaxy(main_win) - 2 - getmaxy(enemy_team_win) - getmaxy(player_team_win),
+    getmaxx(main_win)-2, 1+getmaxy(enemy_team_win)+getmaxy(player_team_win), 1);
+  box(control_win, 0, 0); 
+
   bool battleContinues = true;
+  int selected_move = 0;
+
+  int turn_count = 0;
 
   while (battleContinues) {
     mvwprintw(enemy_team_win, 1, 1, "ENEMY TEAM");
@@ -125,33 +143,57 @@ int main() {
     }
 
     mvwprintw(player_team_win, 1, 1, "YOUR TEAM");
-      for (int i = 0; i < team2.size(); ++i) {
+    for (int i = 0; i < team2.size(); ++i) {
       mvwprintw(player_team_win, i+2, 1, team2[i].getName());
       mvwprintw(player_team_win, i+2, 21, "%3d", team2[i].getHp());    
     }
+
+    mvwprintw(control_win, 1, 1, "YOUR MOVES");
+    const std::vector<Move>& player_moves = team1[0].getMoves();
+    for (int i = 0; i < player_moves.size(); ++i) {
+      if (i == selected_move) {
+        wattron(control_win, A_REVERSE);
+        mvwprintw(control_win, i+2, 1, player_moves[i].getName().c_str());
+        wattroff(control_win, A_REVERSE);
+      } else {
+        mvwprintw(control_win, i+2, 1, player_moves[i].getName().c_str());
+      }
+    }
+
+    mvwprintw(control_win, 6, 1, "%d", turn_count);
+
+    wrefresh(main_win);
+    wrefresh(enemy_team_win);
+    wrefresh(player_team_win);
+    wrefresh(control_win);
+
+    int c = wgetch(main_win);
+    switch (c) {
+      case 'q':
+      case 'Q':
+        battleContinues = false;
+        break;
+      case KEY_UP:
+        if (selected_move > 0) --selected_move;
+        break;
+      case KEY_DOWN:
+        if (selected_move < player_moves.size()) ++selected_move;
+        break;
+      default:
+        break;  //do nothing if unrecognized key pressed
+    }
+    
+    ++turn_count;
   }
-
-
-
-  //getch(); // equivalent to wgetch(stdscr);
-  //         // wgetch(win) does wrefresh(win) then reads input, so getch refreshes
-  //         // stdscr then reads input
   
-  // just calling getch, or just refresh()ing won't actually update the screen
-  // because refresh outputs stdscr, but I'm not actually writing anything
-  // to stdscr, I'm writing to window, so I need to refresh that window.
-
-  // i.e. I don't think contents of windows are actually composed 
-  // e.g. stdscr doesn't contain the contents of whatever windows are inside itself.
-
-  wgetch(main_win); // refreshes window (outputs content of window to terminal)
-                  // and then reads window
-  
-  // wait a minute... none of those comments make any sense because
-  // this whole time I've been calling wgetch(main_win) and it has been updating
-  // enemy_team_win and player_team_win too... ???
-
   endwin();
 
   return 0;
 }
+
+//made progress
+//I don't understand how window refreshing works at all
+//I don't understand why every time I press up or down turn_count
+//gets incremented 3 times
+//...
+//this is debugging for tomorrow ... ?
