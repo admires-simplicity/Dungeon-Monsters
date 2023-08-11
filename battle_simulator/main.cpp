@@ -82,12 +82,6 @@ public:
 int main() {
   int turn;
 
-  //Monster grassman { 1 };
-  //grassman.addMove(MoveList[1]);
-
-  //Monster firecreature { 4 };
-  //firecreature.addMove(MoveList[1]);
-
   std::vector<Monster> team1;
   team1.push_back(Monster{ 1 });
   team1.push_back(Monster{ 1 });
@@ -96,44 +90,10 @@ int main() {
   team2.push_back(Monster{ 4 });
   team2.push_back(Monster{ 4 });
 
-  //std::cout << "GAME START" << std::endl;  
-
-  // turn = 1;
-  // while (turn != 0) {
-  //   std::cout << "grassman has " << grassman.getHp() << "HP" << std::endl;
-  //   std::cout << "firecreature has " << firecreature.getHp() << "HP" << std::endl;
-
-  //   int move;
-  //   std::cout << "what move?" << std::endl;
-  //   std::cin >> move;
-    
-  //   if (turn == 1) {
-  //     std::cout << "grassman used move " << move << std::endl;
-  //     bool kill = firecreature.receiveAttack(grassman.getMove(move));
-  //     if (kill) {
-  //       "grassman wins!";
-  //       turn = 0;
-  //       continue;
-  //     }
-  //     turn = 2;
-  //   } else if (turn == 2) {
-  //     std::cout << "firecreature used move " << move << std::endl;
-  //     bool kill = grassman.receiveAttack(firecreature.getMove(move));
-  //     if (kill) {
-  //       "firecreature wins!";
-  //       turn = 0;
-  //       continue;
-  //     }
-  //     turn = 1;
-  //   } else {
-  //     //error
-  //     std::cout << "ERROR" << std::endl;
-  //     std::exit(1);
-  //   }
-  // }
-  //
-  //std::cout << "GAME OVER. THANKS FOR PLAYING" << std::endl;
-
+  for (int i = 0; i < team1.size(); ++i) {
+    team1[i].addMove(MoveList[1]);
+    team2[i].addMove(MoveList[1]);
+  }
 
   //initialize ncurses
   initscr();            //start curses mode
@@ -147,8 +107,6 @@ int main() {
   box(main_win, 0, 0);
 
   wmove(main_win, 1, 1);
-  //wprintw(main_win, "main_w.win->_maxx == %d, main_w.win->_maxy == %d",
-  //  getmaxx(main_win), getmaxy(main_win));
   
   WINDOW* enemy_team_win = subwin(main_win, 20, getmaxx(main_win) - 2, 1, 1);
   box(enemy_team_win, 0, 0);
@@ -157,13 +115,23 @@ int main() {
     getmaxy(enemy_team_win)+1, 1);
   box(player_team_win, 0, 0);
 
-  mvwprintw(enemy_team_win, 1, 1, "ENEMY TEAM");
-  for (int i = 0; i < team1.size(); ++i) {
-    mvwprintw(enemy_team_win, i+2, 1, team1[i].getName());
-    mvwprintw(enemy_team_win, i+2, 21, "%3d", team1[i].getHp());    
+  bool battleContinues = true;
+
+  while (battleContinues) {
+    mvwprintw(enemy_team_win, 1, 1, "ENEMY TEAM");
+    for (int i = 0; i < team1.size(); ++i) {
+      mvwprintw(enemy_team_win, i+2, 1, team1[i].getName());
+      mvwprintw(enemy_team_win, i+2, 21, "%3d", team1[i].getHp());    
+    }
+
+    mvwprintw(player_team_win, 1, 1, "YOUR TEAM");
+      for (int i = 0; i < team2.size(); ++i) {
+      mvwprintw(player_team_win, i+2, 1, team2[i].getName());
+      mvwprintw(player_team_win, i+2, 21, "%3d", team2[i].getHp());    
+    }
   }
 
-  mvwprintw(player_team_win, 1, 1, "YOUR TEAM");
+
 
   //getch(); // equivalent to wgetch(stdscr);
   //         // wgetch(win) does wrefresh(win) then reads input, so getch refreshes
@@ -178,6 +146,10 @@ int main() {
 
   wgetch(main_win); // refreshes window (outputs content of window to terminal)
                   // and then reads window
+  
+  // wait a minute... none of those comments make any sense because
+  // this whole time I've been calling wgetch(main_win) and it has been updating
+  // enemy_team_win and player_team_win too... ???
 
   endwin();
 
