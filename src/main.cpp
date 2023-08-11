@@ -21,7 +21,7 @@ public:
 
 void ncurses_setup() {
   initscr();            //start curses mode
-  cbreak();             //line buffering disabled
+  cbreak();             //line buffering disabled -- don't have to wait until \n to receive input
   noecho();             //don't echo() while doing getch()
   keypad(stdscr, TRUE); //enable function keys
   curs_set(0);          //hide cursor

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <ncurses.h>
 
 enum class Type {
   FIRE, WATER, GRASS, NORMAL,
@@ -75,43 +76,75 @@ int main() {
   std::vector<Monster> team1;
   std::vector<Monster> team2;
 
-  std::cout << "GAME START" << std::endl;
+  std::cout << "GAME START" << std::endl;  
 
-  turn = 1;
-  while (turn != 0) {
-    std::cout << "grassman has " << grassman.getHp() << "HP" << std::endl;
-    std::cout << "firecreature has " << firecreature.getHp() << "HP" << std::endl;
+  // turn = 1;
+  // while (turn != 0) {
+  //   std::cout << "grassman has " << grassman.getHp() << "HP" << std::endl;
+  //   std::cout << "firecreature has " << firecreature.getHp() << "HP" << std::endl;
 
-    int move;
-    std::cout << "what move?" << std::endl;
-    std::cin >> move;
+  //   int move;
+  //   std::cout << "what move?" << std::endl;
+  //   std::cin >> move;
     
-    if (turn == 1) {
-      std::cout << "grassman used move " << move << std::endl;
-      bool kill = firecreature.receiveAttack(grassman.getMove(move));
-      if (kill) {
-        "grassman wins!";
-        turn = 0;
-        continue;
-      }
-      turn = 2;
-    } else if (turn == 2) {
-      std::cout << "firecreature used move " << move << std::endl;
-      bool kill = grassman.receiveAttack(firecreature.getMove(move));
-      if (kill) {
-        "firecreature wins!";
-        turn = 0;
-        continue;
-      }
-      turn = 1;
-    } else {
-      //error
-      std::cout << "ERROR" << std::endl;
-      std::exit(1);
-    }
-  };
+  //   if (turn == 1) {
+  //     std::cout << "grassman used move " << move << std::endl;
+  //     bool kill = firecreature.receiveAttack(grassman.getMove(move));
+  //     if (kill) {
+  //       "grassman wins!";
+  //       turn = 0;
+  //       continue;
+  //     }
+  //     turn = 2;
+  //   } else if (turn == 2) {
+  //     std::cout << "firecreature used move " << move << std::endl;
+  //     bool kill = grassman.receiveAttack(firecreature.getMove(move));
+  //     if (kill) {
+  //       "firecreature wins!";
+  //       turn = 0;
+  //       continue;
+  //     }
+  //     turn = 1;
+  //   } else {
+  //     //error
+  //     std::cout << "ERROR" << std::endl;
+  //     std::exit(1);
+  //   }
+  // }
+  //
+  //std::cout << "GAME OVER. THANKS FOR PLAYING" << std::endl;
 
-  std::cout << "GAME OVER. THANKS FOR PLAYING" << std::endl;
+
+  //initialize ncurses
+  initscr();            //start curses mode
+  cbreak();             //line buffering disabled -- don't have to wait until \n to receive input
+  noecho();             //don't echo() while doing getch()
+  keypad(stdscr, TRUE); //enable function keys
+  curs_set(0);          //hide cursor
+  //timeout(0);           //non-blocking getch()
+
+  WINDOW* main_win = newwin(50, 100, 0, 0);
+  box(main_win, 0, 0);
+
+  wmove(main_win, 1, 1);
+  wprintw(main_win, "main_w.win->_maxx == %d, main_w.win->_maxy == %d",
+    getmaxx(main_win), getmaxy(main_win));
+  
+  //getch(); // equivalent to wgetch(stdscr);
+  //         // wgetch(win) does wrefresh(win) then reads input, so getch refreshes
+  //         // stdscr then reads input
+  
+  // just calling getch, or just refresh()ing won't actually update the screen
+  // because refresh outputs stdscr, but I'm not actually writing anything
+  // to stdscr, I'm writing to window, so I need to refresh that window.
+
+  // i.e. I don't think contents of windows are actually composed 
+  // e.g. stdscr doesn't contain the contents of whatever windows are inside itself.
+
+  wgetch(main_win); // refreshes window (outputs content of window to terminal)
+                  // and then reads window
+
+  endwin();
 
   return 0;
 }
