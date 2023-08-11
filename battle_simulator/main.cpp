@@ -127,9 +127,16 @@ int main() {
   box(main_win, 0, 0);
 
   wmove(main_win, 1, 1);
-  wprintw(main_win, "main_w.win->_maxx == %d, main_w.win->_maxy == %d",
-    getmaxx(main_win), getmaxy(main_win));
+  //wprintw(main_win, "main_w.win->_maxx == %d, main_w.win->_maxy == %d",
+  //  getmaxx(main_win), getmaxy(main_win));
   
+  WINDOW* enemy_team_win = subwin(main_win, 20, getmaxx(main_win) - 2, 1, 1);
+  box(enemy_team_win, 0, 0);
+
+  WINDOW* player_team_win = subwin(main_win, 20, getmaxx(main_win) - 2,
+    getmaxy(enemy_team_win)+1, 1);
+  box(player_team_win, 0, 0);
+
   //getch(); // equivalent to wgetch(stdscr);
   //         // wgetch(win) does wrefresh(win) then reads input, so getch refreshes
   //         // stdscr then reads input
