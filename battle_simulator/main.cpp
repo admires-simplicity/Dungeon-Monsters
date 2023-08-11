@@ -9,28 +9,35 @@ enum class Type {
 
 class Move {
   Type type;
+  std::string name;
 public:
   const unsigned int power;
   Move() : type(Type::NORMAL), power(0) {} //same as MonsterSpecies class
-  Move(Type type, unsigned int power) : type(type), power(power) {}
+  Move(Type type, unsigned int power, std::string name) : type(type), power(power),
+    name(name) {}
 };
 
 std::map<unsigned int, Move> MoveList {
-  { 1, Move(Type::NORMAL, 10) }, // tackle
+  { 1, Move(Type::NORMAL, 10, "Tackle") }, // tackle
+  { 2, Move(Type::NORMAL, 1, "Stare")}
 };
 
 class MonsterSpecies {
   Type type;
   std::map<unsigned int, Move> moveset;
+  std::string name;
 public:
   MonsterSpecies() : type(Type::NORMAL) {}    // not valid but I need this for map operator[] to work... maybe I should not use mape operator[] ? // or I could just construct a valid MonsterSpecies, e.g. species 1
-  MonsterSpecies(Type type) : type(type) {}
+  MonsterSpecies(Type type, std::string name) : type(type), name(name) {}
   //MonsterSpecies(Type type, std::map<unsigned int, Move>& moveset) : type(type), moveset(moveset) {}
+  std::string getName() const {
+    return name;
+  }
 };
 
 std::map<unsigned int, MonsterSpecies> MonsterEncyclopedia {
-  { 1, MonsterSpecies(Type::GRASS) },
-  { 4, MonsterSpecies(Type::FIRE) },
+  { 1, MonsterSpecies(Type::GRASS, "Grassman") },
+  { 4, MonsterSpecies(Type::FIRE, "Firecreature") },
 };
 
 class Monster {
@@ -38,8 +45,12 @@ class Monster {
   std::vector<Move> moves;
   int hp;
   bool alive;
+  std::string name;
 public:
-  Monster(unsigned int id) : species(MonsterEncyclopedia[id]), hp(25), alive(true) {}
+  Monster(unsigned int id) : species(MonsterEncyclopedia[id]), hp(25),
+      alive(true) {
+    name = species.getName();
+  }
   void addMove(Move m) {
     moves.push_back(m);
   }
@@ -48,6 +59,10 @@ public:
   }
   Move& getMove(unsigned int n) {
     return moves[n];
+  }
+
+  const char* getName() {
+    return name.c_str();
   }
 
   bool receiveAttack(Move attack) {
@@ -67,16 +82,21 @@ public:
 int main() {
   int turn;
 
-  Monster grassman { 1 };
-  grassman.addMove(MoveList[1]);
+  //Monster grassman { 1 };
+  //grassman.addMove(MoveList[1]);
 
-  Monster firecreature { 4 };
-  firecreature.addMove(MoveList[1]);
+  //Monster firecreature { 4 };
+  //firecreature.addMove(MoveList[1]);
 
   std::vector<Monster> team1;
-  std::vector<Monster> team2;
+  team1.push_back(Monster{ 1 });
+  team1.push_back(Monster{ 1 });
 
-  std::cout << "GAME START" << std::endl;  
+  std::vector<Monster> team2;
+  team2.push_back(Monster{ 4 });
+  team2.push_back(Monster{ 4 });
+
+  //std::cout << "GAME START" << std::endl;  
 
   // turn = 1;
   // while (turn != 0) {
@@ -136,6 +156,14 @@ int main() {
   WINDOW* player_team_win = subwin(main_win, 20, getmaxx(main_win) - 2,
     getmaxy(enemy_team_win)+1, 1);
   box(player_team_win, 0, 0);
+
+  mvwprintw(enemy_team_win, 1, 1, "ENEMY TEAM");
+  for (int i = 0; i < team1.size(); ++i) {
+    mvwprintw(enemy_team_win, i+2, 1, team1[i].getName());
+    mvwprintw(enemy_team_win, i+2, 21, "%3d", team1[i].getHp());    
+  }
+
+  mvwprintw(player_team_win, 1, 1, "YOUR TEAM");
 
   //getch(); // equivalent to wgetch(stdscr);
   //         // wgetch(win) does wrefresh(win) then reads input, so getch refreshes
